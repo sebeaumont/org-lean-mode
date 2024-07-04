@@ -10,10 +10,13 @@ def add1 (x : Nat) :=
 #check add1
 #+end_src
 ```
+
+Warning this is pre-alpha and may not work at all. 
+
 Depends on: 
-- polymode (with patch) : [https://github.com/sebeaumont/polymode/tree/seb/move-vars]
+- polymode
 - lean4-mode (tested with this fork) : [https://github.com/mekeor/emacs-lean4.git] 
-- org (shipped with emacs - but watch this space also for upcoming latex processing improvements)
+- org 
 
 Tested: emacs 29.1 with `works for me` software assurance. YMMV.
 
