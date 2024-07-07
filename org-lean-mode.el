@@ -4,7 +4,9 @@
 ;;; Commentary:
 
 ;; A Major polymode for editing Lean code embedded in Org files
-;; Experimental 
+;; Copyright (c) 2024 Simon Beaumont. All Rights Reserved.
+
+;; Experimental not for distribution
 
 ;;; Code:
 
@@ -55,12 +57,11 @@
   ;; Keep the code block fences in Org mode, so they can be folded, etc.
   :head-mode 'org-mode
   :tail-mode 'org-mode
-  ;; not sure we need these here
+  ;; CHECK: not sure we need these here - looks like Agda mode carry over
   ;; Disable font-lock-mode 
   ;; and undo the change to indent-line-function Polymode makes.
   :init-functions
-  '(;; not sure we need to do this here
-    (lambda (_) (font-lock-mode 0))
+  '((lambda (_) (font-lock-mode 0))
     (lambda (_) (setq indent-line-function #'indent-relative))
     )
   )
@@ -83,6 +84,9 @@
 (defun olm/get-buffer-file-name (buf)
   (with-current-buffer buf
     buffer-file-name))
+
+;;; TODO combine these round trip functions?
+;;; TODO rationalise REs (see above)
 
 (defun olm/org-to-lean (src dst)
   (with-current-buffer src
@@ -136,7 +140,7 @@
 
 ;;; hooks...
 
-(defvar scratch-buffer "org-lean-scratch")
+(defvar scratch-buffer "*org-lean-scratch*")
 
 (defun olm/before-switch-hook (old new)
   (message "switching from: %s to: %s" old new)
@@ -147,7 +151,6 @@
       (olm/org-to-lean old scratch-buf)
       (olm/overwrite-buffer scratch-buf new)
       )
-     
      ;; switch to org-mode
      ((eq (buffer-local-value 'major-mode new) 'org-mode)
       (olm/lean-to-org old scratch-buf)
