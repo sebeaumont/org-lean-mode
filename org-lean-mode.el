@@ -44,6 +44,9 @@
        (zero-or-more blank)
        "#+end"))
 
+
+;; TODO ensure transfer of buffer-file-truename to lean4-mode
+
 (define-innermode poly-org-lean-innermode
   :mode 'lean4-mode
   :head-matcher (rx code-start)
