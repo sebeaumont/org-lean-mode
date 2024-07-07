@@ -57,9 +57,6 @@
   ;; Keep the code block fences in Org mode, so they can be folded, etc.
   :head-mode 'org-mode
   :tail-mode 'org-mode
-  ;; CHECK: not sure we need these here - looks like Agda mode carry over
-  ;; Disable font-lock-mode 
-  ;; and undo the change to indent-line-function Polymode makes.
   :init-functions
   '((lambda (_) (font-lock-mode 0))
     (lambda (_) (setq indent-line-function #'indent-relative))
