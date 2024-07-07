@@ -116,13 +116,6 @@
             ;; process each line and un-comment 
             (olm/write-buffer dst (string-trim-left line "-- ")))))))
 
-(defun olm/overwrite-buffer2 (src dst)
-  (with-current-buffer dst
-    (let ((pos (point)))
-      (message "pos: %d" pos)
-      (erase-buffer)
-      (insert-buffer src)
-      (goto-char pos))))
 
 (defun olm/overwrite-buffer (src dst)
   (with-current-buffer dst
