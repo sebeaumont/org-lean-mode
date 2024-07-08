@@ -25,22 +25,26 @@ could create a custom version of that which is aware of our
 roundtripping transformation (which basically consists in commenting
 all the non lean code bits and back again).
 
+Having played with this a bit -- the visual distractions are a bit too
+intrusive but maybe this can be overcome -- having said that even
+markdown fences are acting strange this morning. Maybe I'm just
+more sensitive to visual artefacts now. There's lots of weirdness
+lurking I'm sure.
 
-```
-#+begin_src lean
-def add1 (x : Nat) :=
-  x + 1
-#check add1
-#+end_src
-```
+
+    #+begin_src lean
+    def add1 (x : Nat) :=
+    x + 1
+    #check add1
+    #+end_src
+
 
 Depends on: 
-- polymode
+- polymode   (currently needs a patch but can be fixed here)
 - lean4-mode (tested with this fork) : [https://github.com/mekeor/emacs-lean4.git] 
 - org 
 
 TODO: 
-- fix all the remaining silly bugs and annoyances
 - make sure we can use standard polymode by transferring `buffer-file-truename`
 - test with lsp-mode (not too likely atm)
 
