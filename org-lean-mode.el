@@ -22,16 +22,15 @@
   :mode 'org-mode
   :keep-in-mode 'host)
 
-;; TODO/FIXME
-;; turn off some org-mode minor-modes in the lean4 mode which dont make sense
-;; e.g. indentation is ok, but prettyentites are confusing... also font-locking could
+;; TODO
+;; investigate some org-mode minor-modes in the lean4 mode which dont make sense
+;; e.g. indentation is ok, but prettyentites are confusing.
 ;; be simpified here as this was a carry over from Agda IIRC.
 
 ;; derived REs
 
 ;; these are tricky due to way lean4 mode re-interprets underscores as unicode
 ;; subscript intros -- we need to provide these as alternatives to "_src"
-;; TODO more fine tuned and efficient REs for round-trippers too.
 
 (rx-define code-start
   (seq (zero-or-more "--")
@@ -76,49 +75,64 @@
               (append '(olm/before-switch-hook)
                       polymode-before-switch-buffer-hook)))
 
-;;; utils
-
-(defun olm/get-buffer-file-name (buf)
-  (with-current-buffer buf
-    buffer-file-name))
-
 ;;; TODO combine these round trip functions?
-;;; TODO rationalise REs (see above)
 
 (defun olm/org-to-lean (src dst)
   (with-current-buffer src
     (save-excursion
       (goto-char (point-min))
       (let ((inchunkp nil))
-        ;; 
         (olm/erase-that-buffer dst)
         (while (not (eobp))
-          (let ((line (buffer-substring (point)
-                                        (progn (forward-line 1) (point)))))
-            ;; process each line and comment out all the none
-            (cond ((string-prefix-p "#+end_src" line)
-                   (setq inchunkp nil)
-                   (olm/write-buffer dst (concat "-- " line)))
-                  
-                  ((string-prefix-p "#+begin_src lean" line) 
-                   (setq inchunkp 't)
-                   (olm/write-buffer dst (concat "-- " line)))
-                  
-                  (inchunkp (olm/write-buffer dst line))
-                  
-                  (t (olm/write-buffer dst (concat "-- " line))))))))))
+          (let ((line (buffer-substring
+                       (point)
+                       (progn (forward-line 1) (point)))))
+            ;; for each line in buffer
+            (cond
+             ;; code ends fence
+             ((string-match-p (rx code-end) line)
+              (setq inchunkp nil)
+              (olm/write-buffer dst (concat "-- " line)))
+
+             ;; code starts fence
+             ((string-match-p (rx code-start) line) 
+              (setq inchunkp 't)
+              (olm/write-buffer dst (concat "-- " line)))
+
+             ;; code
+             (inchunkp (olm/write-buffer dst line))
+             
+             ;; blank lines
+             ((string-blank-p line) (olm/write-buffer dst line))
+             
+             ;; make text into comments
+             (t (olm/write-buffer dst (concat "-- " line))))))))))
 
 (defun olm/lean-to-org (src dst)
   (with-current-buffer src
     (save-excursion
       (goto-char (point-min))
-        ;; fixme: don't strip comments from source blocks! 
+      (let ((inchunkp nil))
         (olm/erase-that-buffer dst)
         (while (not (eobp))
-          (let ((line (buffer-substring (point)
-                                        (progn (forward-line 1) (point)))))
-            ;; process each line and un-comment 
-            (olm/write-buffer dst (string-trim-left line "-- ")))))))
+          (let ((line (buffer-substring
+                       (point)
+                       (progn (forward-line 1) (point)))))
+            (cond
+             ;; code end fence
+             ((string-match-p (rx code-end) line)
+              (setq inchunkp nil)
+              (olm/write-buffer dst (string-trim-left line "-- ")))
+             ;; fence start
+             ((string-match-p (rx code-start) line)
+              (setq inchunkp 't)
+              (olm/write-buffer dst (string-trim-left line "-- ")))
+             ;; code as is
+             (inchunkp (olm/write-buffer dst line))
+             ;; blank lines as is 
+             ((string-blank-p line) (olm/write-buffer dst line))
+             ;; uncomment text
+             (t (olm/write-buffer dst (string-trim-left line "-- "))))))))))
 
 
 (defun olm/overwrite-buffer (src dst)
